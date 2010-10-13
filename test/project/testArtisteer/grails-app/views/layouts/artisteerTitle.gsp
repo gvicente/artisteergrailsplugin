@@ -1,0 +1,1 @@
+A default title, change in artisteerTitle.gsp in layouts folder!

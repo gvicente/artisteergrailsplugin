@@ -1,0 +1,1 @@
+<a href="#">configurePageFooterLinkInLayoutDir</a>

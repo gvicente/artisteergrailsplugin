@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/testArtisteer.iml" filepath="$PROJECT_DIR$/testArtisteer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/testArtisteer-grailsPlugin-artisteerplugin.iml" filepath="$PROJECT_DIR$/testArtisteer-grailsPlugin-artisteerplugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/testArtisteer-grailsPlugin-artisteerplugin-grailsPlugins.iml" filepath="$PROJECT_DIR$/testArtisteer-grailsPlugin-artisteerplugin-grailsPlugins.iml" />
+      <module fileurl="file://$PROJECT_DIR$/testArtisteer-grailsPlugins.iml" filepath="$PROJECT_DIR$/testArtisteer-grailsPlugins.iml" />
+    </modules>
+  </component>
+</project>
+
