@@ -20,8 +20,14 @@ class TemplateController implements ApplicationContextAware {
   def private  boolean generateGspForTemplate(Template myTemplate, overwrite) {
 
     if (myTemplate) {
+
       String pathToAppWebAppDir = applicationContext.getResourceByPath("/").getFile().getAbsolutePath();
+
+
       String pathToRootAppDir = pathToAppWebAppDir + File.separatorChar + ".." + File.separatorChar;
+      if(applicationContext.isWarDeployed()) {
+        pathToRootAppDir = pathToAppWebAppDir;
+      }
       String pathToLayoutsDir = pathToRootAppDir + File.separatorChar + "grails-app" + File.separatorChar + "views" + File.separatorChar + "layouts"
       def gspFile = new File(pathToLayoutsDir + File.separatorChar + myTemplate.name + ".gsp");
       if (gspFile.exists() && !overwrite) {
