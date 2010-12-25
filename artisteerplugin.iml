@@ -14,6 +14,7 @@
         <webroots>
           <root url="file://$MODULE_DIR$/web-app" relative="/" />
           <root url="file://$MODULE_DIR$/web-app" relative="/" />
+          <root url="file://$MODULE_DIR$/grails-app/views" relative="/" />
         </webroots>
         <sourceRoots />
       </configuration>
@@ -32,6 +33,9 @@
       <sourceFolder url="file://$MODULE_DIR$/test/unit" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/test/integration" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/target/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/target/test-classes" />
+      <excludeFolder url="file://$MODULE_DIR$/web-app/plugins" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

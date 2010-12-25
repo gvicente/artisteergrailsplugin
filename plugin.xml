@@ -5,8 +5,8 @@
   <description>\
 Plugin that provides a simple controller for uploading artisteer zip file templates to grails. The plugin automatically
 unzips the template, creates a corresponding gsp layout file which links to an unpacked version of the artisteer template.
-The gsp contains links to other layouts that the user can customize (footer, title, menurendering). Footer and title etc is best to
-take from db, but I left it up to the user to configure that.
+The gsp contains links to other layouts that the user can customize (footer, title, menurendering).
+ Footer and title etc is best to take from eg. the database, but I left it up to the user to configure that.
 </description>
   <documentation>http://grails.org/plugin/artisteerplugin</documentation>
   <resources>

@@ -8,6 +8,6 @@ class Template {
     static constraints = {
 
       name(nullable:false, blank:false, editable:false, unique:true)
-      zip(nullable:false)
+      zip(nullable:false,maxSize:1024*1000*5)
     }
 }
