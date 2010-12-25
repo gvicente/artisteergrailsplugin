@@ -7,12 +7,17 @@ import groovy.xml.StreamingMarkupBuilder
 import groovy.xml.XmlUtil
 import groovy.xml.MarkupBuilder
 import grails.util.GrailsUtil
+import org.codehaus.groovy.grails.commons.spring.GrailsRuntimeConfigurator
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 class TemplateService implements ApplicationContextAware {
-  ApplicationContext applicationContext
+  ApplicationContext  applicationContext = (ApplicationContext)ApplicationHolder.getApplication().getMainContext();
 
+   def grailsRuntimeConfigurator = new GrailsRuntimeConfigurator(applicationContext.getBean("grailsApplication"));
+   def pluginManager = grailsRuntimeConfigurator.getPluginManager();
+  
   static transactional = false
-  def grailsApplication
+
 
 
   def private boolean generateGspFromTemplateHtml(Template myTemplate, File gspFileOut) {
@@ -158,17 +163,12 @@ class TemplateService implements ApplicationContextAware {
 
       }
 
-//write the file to the gsp file!
-      //def outputBuilder = new MarkupBuilder()
-      //println html
-      //String result = XmlUtil.serialize(outputBuilder.bind{mkp.yield html})
 
-      def writer = new StringWriter()
+
       def outHtml = new StreamingMarkupBuilder()
 
+
       def String output = XmlUtil.serialize(outHtml.bind {
-        //mkp.htmlDeclaration()
-        //  mkp.declareNamespace('':'http://www.w3.org/1999/xhtml')
 
         mkp.declareNamespace('g': 'http://grails.codehaus.org/tags')
         mkp.declareNamespace('nav': 'http://www.grails.org/plugin/navigation')
@@ -178,7 +178,7 @@ class TemplateService implements ApplicationContextAware {
 
       output = output.replace('<?xml version="1.0" encoding="UTF-8"?>', '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd>"')
 
-      //shitty xmlutil?? doesn't generate correct xhtml .. so fix this with regexp replacement for now..
+      // xmlutil doesn't generate correct xhtml .. so fix this with regexp replacement  for now..
       def replacement = output.replaceAll(/<.*\/>/, {
 
         // it.replaceAll(/(<)(.* )(.* )(.*")(\/>)/,'$1$2$3$4></$2>')
@@ -234,6 +234,8 @@ class TemplateService implements ApplicationContextAware {
     String pathToAppWebAppDir = applicationContext.getResourceByPath("/").getFile().getAbsolutePath();
     String pathToLayoutsDir = pathToAppWebAppDir + "/../grails-app/views/layouts/"
     println pathToLayoutsDir;
+
+
     def fileList = [new File(pathToLayoutsDir + "artisteerLogoName.gsp"), new File(pathToLayoutsDir + "artisteerLogoText.gsp"),
             new File(pathToLayoutsDir + "artisteerNavMenu.gsp"), new File(pathToLayoutsDir + "artisteerFooterText.gsp"),
             new File(pathToLayoutsDir + "artisteerPageFooterLink.gsp"),
@@ -283,37 +285,78 @@ class TemplateService implements ApplicationContextAware {
 
 
           """); break;
-          case "artisteerNavMenu.gsp": file.setText("""
-<artisteer:renderTopMenu >
+          case "artisteerNavMenu.gsp":
+                   if(pluginManager.hasGrailsPlugin("navigation")) {
+                     file.setText("""
+                                      <artisteer:renderTopMenu >
+                                        <nav:eachItem var="navMainItem">
 
-  <artisteer:topNavListItem active="true" href="#" title="A default title">
+                                          <artisteer:topNavListItem active=\"\${navMainItem.active}\" href=\"\${navMainItem.link}\" title=\"\${navMainItem.title}\">
+                                          </artisteer:topNavListItem>
 
-  </artisteer:topNavListItem>
+                                          <nav:ifHasItems>
+                                            <artisteer:renderSubMenu >
 
-  <artisteer:topNavListItem href="#" title="A default title">
-  <artisteer:renderSubMenu >
-    <artisteer:subNavListItem href="#" title="A default submenu title">
-             <artisteer:renderSubMenu >
-               <artisteer:subNavListItem href="#" title="A default subsubmenu title">
+                                              <nav:eachSubItem var="navSubItem">
 
-               </artisteer:subNavListItem>
-               <artisteer:subNavListItem href="#" title="A default subsubmenu title">
+                                                <artisteer:subNavListItem href=\"\${navMainItem.link}\" title=\"\${navMainItem.title}\">
 
-               </artisteer:subNavListItem>
-               <artisteer:subNavListItem href="#" title="A default subsubmenu title">
+                                                </artisteer:subNavListItem>
 
-               </artisteer:subNavListItem>
-             </artisteer:renderSubMenu>
-    </artisteer:subNavListItem>
-  </artisteer:renderSubMenu>
-  </artisteer:topNavListItem>
+                                                <nav:ifHasItems>
+                                                  <artisteer:renderSubMenu>
+                                                    <nav:eachSubItem var="navSubSubItem">
+                                                      <artisteer:subNavListItem href=\"\${navMainItem.link}\" title=\"\${navMainItem.title}\">
+                                                      </artisteer:subNavListItem>
+                                                    </nav:eachSubItem>
+                                                  </artisteer:renderSubMenu>
+                                                </nav:ifHasItems>
+                                              </nav:eachSubItem>
+                                            </artisteer:renderSubMenu>
+                                          </nav:ifHasItems>
+                                        </nav:eachItem>
+                                      </artisteer:renderTopMenu>
+
+                                                """);
 
 
-</artisteer:renderTopMenu>
+                   } else {
+                       file.setText("""
+                                        <artisteer:renderTopMenu >
+
+                                          <artisteer:topNavListItem active="true" href="#" title="A default title">
+
+                                          </artisteer:topNavListItem>
+
+                                          <artisteer:topNavListItem href="#" title="A default title">
+                                          <artisteer:renderSubMenu >
+                                            <artisteer:subNavListItem href="#" title="A default submenu title">
+                                                     <artisteer:renderSubMenu >
+                                                       <artisteer:subNavListItem href="#" title="A default subsubmenu title">
+
+                                                       </artisteer:subNavListItem>
+                                                       <artisteer:subNavListItem href="#" title="A default subsubmenu title">
+
+                                                       </artisteer:subNavListItem>
+                                                       <artisteer:subNavListItem href="#" title="A default subsubmenu title">
+
+                                                       </artisteer:subNavListItem>
+                                                     </artisteer:renderSubMenu>
+                                            </artisteer:subNavListItem>
+                                          </artisteer:renderSubMenu>
+                                          </artisteer:topNavListItem>
 
 
-          """); break;
-          default: file.setText("<p>" + file.getName() + ": set configuration in layoutsdir</p>"); break;
+                                        </artisteer:renderTopMenu>
+
+
+                                                  """);
+                   }
+          
+           break;
+          default: file.setText("<p>" + file.getName() + ": set configuration in layoutsdir</p>");
+
+          break;
         }
       }
 
