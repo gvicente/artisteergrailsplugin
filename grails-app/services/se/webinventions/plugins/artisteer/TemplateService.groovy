@@ -9,15 +9,23 @@ import groovy.xml.MarkupBuilder
 import grails.util.GrailsUtil
 import org.codehaus.groovy.grails.commons.spring.GrailsRuntimeConfigurator
 import org.codehaus.groovy.grails.commons.ApplicationHolder
+import org.springframework.beans.factory.InitializingBean
 
-class TemplateService implements ApplicationContextAware {
+class TemplateService implements ApplicationContextAware,  InitializingBean {
   ApplicationContext  applicationContext = (ApplicationContext)ApplicationHolder.getApplication().getMainContext();
 
    def grailsRuntimeConfigurator = new GrailsRuntimeConfigurator(applicationContext.getBean("grailsApplication"));
    def pluginManager = grailsRuntimeConfigurator.getPluginManager();
+   def serverUrl = "";
+  def grailsApplication;
   
   static transactional = false
 
+  void afterPropertiesSet() throws java.lang.Exception {
+
+    this.serverUrl = grailsApplication?.config?.grails?.serverURL
+
+   }
 
 
   def private boolean generateGspFromTemplateHtml(Template myTemplate, File gspFileOut) {
@@ -37,7 +45,7 @@ class TemplateService implements ApplicationContextAware {
       def title = "my own title"
 
       //remove certain elements..
-      def serverUrl = grailsApplication.config?.grails?.serverURL
+
 
 
       html.HEAD[0].replaceNode {
@@ -116,7 +124,7 @@ class TemplateService implements ApplicationContextAware {
           it?.@class?.text()?.indexOf("art-menu") != -1
         }
 
-        navMenu.replaceNode {
+        navMenu?.replaceNode {
           //it is important that the artisteerNavigation makes a UL with class art-nav to work..
           //g.applyLayout(name:"artisteerNavigation")
           g.applyLayout(name: "artisteerNavMenu")
@@ -128,7 +136,7 @@ class TemplateService implements ApplicationContextAware {
           it?.UL?.@class?.text()?.indexOf("art-vmenu") != -1
         }
 
-        navVertMenu.replaceNode {
+        navVertMenu?.replaceNode {
           //it is important that the artisteerNavigation makes a UL with class art-nav to work..
           //g.applyLayout(name:"artisteerNavigation")
           g.applyLayout(name: "artisteerVerticalNavMenu")
@@ -143,7 +151,7 @@ class TemplateService implements ApplicationContextAware {
           it?.@class?.text()?.indexOf("art-footer-text") != -1
         }
 
-        footerNodeText.replaceNode {
+        footerNodeText?.replaceNode {
           div(class: "art-footer-text") {
             g.applyLayout(name: "artisteerFooterText")
           }
@@ -154,7 +162,7 @@ class TemplateService implements ApplicationContextAware {
           it?.@class?.text()?.indexOf("art-page-footer") != -1
         }
 
-        footerNodeLink.replaceNode {
+        footerNodeLink?.replaceNode {
           p(class: "art-page-footer") {
             g.applyLayout(name: "artisteerPageFooterLink")
           }

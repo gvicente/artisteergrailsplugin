@@ -1,6 +1,7 @@
 package se.webinventions.plugins.artisteer
 
 import org.springframework.web.multipart.MultipartFile
+import org.springframework.beans.factory.InitializingBean
 import groovy.xml.XmlUtil
 import groovy.xml.StreamingMarkupBuilder
 import org.cyberneko.html.parsers.SAXParser
@@ -8,13 +9,18 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import se.webinventions.plugins.artisteer.TemplateService
 
-class TemplateController implements ApplicationContextAware {
+class TemplateController implements ApplicationContextAware, InitializingBean {
   ApplicationContext applicationContext
 
 
-  def templateService
-   def grailsApplication
+  def templateService;
+   def grailsApplication;
+  Boolean warDeployed = false;
 
+  void afterPropertiesSet() throws java.lang.Exception {
+        this.warDeployed = grailsApplication.isWarDeployed()
+
+  }
   
 
   def private  boolean generateGspForTemplate(Template myTemplate, overwrite) {
@@ -25,7 +31,7 @@ class TemplateController implements ApplicationContextAware {
 
 
       String pathToRootAppDir = pathToAppWebAppDir + File.separatorChar + ".." + File.separatorChar;
-      if(grailsApplication.isWarDeployed()) {
+      if(warDeployed) {
         pathToRootAppDir = pathToAppWebAppDir;
       }
       String pathToLayoutsDir = pathToRootAppDir + File.separatorChar + "grails-app" + File.separatorChar + "views" + File.separatorChar + "layouts"
