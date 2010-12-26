@@ -10,10 +10,10 @@ import se.webinventions.plugins.artisteer.TemplateService
 
 class TemplateController implements ApplicationContextAware {
   ApplicationContext applicationContext
- 
+
 
   def templateService
-    
+   def grailsApplication
 
   
 
@@ -25,7 +25,7 @@ class TemplateController implements ApplicationContextAware {
 
 
       String pathToRootAppDir = pathToAppWebAppDir + File.separatorChar + ".." + File.separatorChar;
-      if(applicationContext.isWarDeployed()) {
+      if(grailsApplication.isWarDeployed()) {
         pathToRootAppDir = pathToAppWebAppDir;
       }
       String pathToLayoutsDir = pathToRootAppDir + File.separatorChar + "grails-app" + File.separatorChar + "views" + File.separatorChar + "layouts"
