@@ -1,5 +1,7 @@
 import se.webinventions.plugins.artisteer.Template
 import se.webinventions.plugins.artisteer.TemplateService
+import grails.util.GrailsUtil
+
 /**
  * Created by IntelliJ IDEA.
  * User: per
@@ -9,14 +11,19 @@ import se.webinventions.plugins.artisteer.TemplateService
  */
 class ArtisteerBootStrap {
 
-  def templateService
-    def init = { servletContext ->
-                      println "init bootstrap for artisteer template plugin"
-      templateService.checkAndCreateInitialDirs();
+	def templateService
+	def init = { servletContext ->
+		switch (GrailsUtil.environment) {
+			case "development":
 
-      templateService.generateInitialTemplates();
 
-    }
-    def destroy = {
-    }
+			//              println "init bootstrap for artisteer template plugin"
+				templateService.checkAndCreateInitialDirs();
+
+				templateService.generateInitialTemplates();
+				break;
+		}
+	}
+	def destroy = {
+	}
 }

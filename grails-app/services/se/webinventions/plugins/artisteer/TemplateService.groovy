@@ -294,42 +294,7 @@ class TemplateService implements ApplicationContextAware,  InitializingBean {
 
           """); break;
           case "artisteerNavMenu.gsp":
-                   if(pluginManager.hasGrailsPlugin("navigation")) {
-                     file.setText("""
-                                      <artisteer:renderTopMenu >
-                                        <nav:eachItem var="navMainItem">
-
-                                          <artisteer:topNavListItem active=\"\${navMainItem.active}\" href=\"\${navMainItem.link}\" title=\"\${navMainItem.title}\">
-                                          </artisteer:topNavListItem>
-
-                                          <nav:ifHasItems>
-                                            <artisteer:renderSubMenu >
-
-                                              <nav:eachSubItem var="navSubItem">
-
-                                                <artisteer:subNavListItem href=\"\${navMainItem.link}\" title=\"\${navMainItem.title}\">
-
-                                                </artisteer:subNavListItem>
-
-                                                <nav:ifHasItems>
-                                                  <artisteer:renderSubMenu>
-                                                    <nav:eachSubItem var="navSubSubItem">
-                                                      <artisteer:subNavListItem href=\"\${navMainItem.link}\" title=\"\${navMainItem.title}\">
-                                                      </artisteer:subNavListItem>
-                                                    </nav:eachSubItem>
-                                                  </artisteer:renderSubMenu>
-                                                </nav:ifHasItems>
-                                              </nav:eachSubItem>
-                                            </artisteer:renderSubMenu>
-                                          </nav:ifHasItems>
-                                        </nav:eachItem>
-                                      </artisteer:renderTopMenu>
-
-                                                """);
-
-
-                   } else {
-                       file.setText("""
+                                          file.setText("""
                                         <artisteer:renderTopMenu >
 
                                           <artisteer:topNavListItem active="true" href="#" title="A default title">
@@ -359,7 +324,7 @@ class TemplateService implements ApplicationContextAware,  InitializingBean {
 
 
                                                   """);
-                   }
+                   
           
            break;
           default: file.setText("<p>" + file.getName() + ": set configuration in layoutsdir</p>");
