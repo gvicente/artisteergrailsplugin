@@ -5,6 +5,8 @@ class ArtisteerTagLib {
   static namespace = "artisteer"
 
 
+
+
   /**
   *
    * BEGIN NAVIGATION TAGS..

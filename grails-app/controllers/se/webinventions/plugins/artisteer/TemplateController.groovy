@@ -14,195 +14,96 @@ class TemplateController implements ApplicationContextAware, InitializingBean {
 
 
   def templateService;
-   def grailsApplication;
+  def grailsApplication;
+  
   Boolean warDeployed = false;
 
   void afterPropertiesSet() throws java.lang.Exception {
-        this.warDeployed = grailsApplication.isWarDeployed()
+    this.warDeployed = grailsApplication.isWarDeployed()
 
   }
-  
-
-  def private  boolean generateGspForTemplate(Template myTemplate, overwrite) {
-
-    if (myTemplate) {
-
-      String pathToAppWebAppDir = applicationContext.getResourceByPath("/").getFile().getAbsolutePath();
 
 
-      String pathToRootAppDir = pathToAppWebAppDir + File.separatorChar + ".." + File.separatorChar;
-      if(warDeployed) {
-        pathToRootAppDir = pathToAppWebAppDir;
+  static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
+
+  def index = {
+    redirect(action: "list", params: params)
+  }
+
+  def list = {
+    params.max = Math.min(params.max ? params.int('max') : 10, 100)
+    [templateInstanceList: Template.list(params), templateInstanceTotal: Template.count()]
+  }
+
+  def create = {
+    def templateInstance = new Template()
+    templateInstance.properties = params
+    return [templateInstance: templateInstance]
+  }
+
+  def save = {
+    def templateInstance = new Template(params)
+    def MultipartFile f = request.getFile('zip');
+
+    println "filename is " + f.getOriginalFilename()
+    templateInstance.name = f.getOriginalFilename().replaceAll(".zip", "");
+
+    if (templateInstance.validate()) {
+      templateInstance.save(flush: true);
+      if (templateService.deflateZipFromTemplate(templateInstance, true)) {
+
+        if(templateService.generateGspForTemplate(templateInstance, true)) {
+         flash.message = "${message(code: 'default.created.message', args: [message(code: 'template.label', default: 'Template'), templateInstance.id])}"
+
+
+        redirect(action: "show", id: templateInstance.id)
+        } else {
+        templateInstance.errors.rejectValue("zip","Could not generate template files from zip")
+        render(view: "create", model: [templateInstance: templateInstance])
       }
-      String pathToLayoutsDir = pathToRootAppDir + File.separatorChar + "grails-app" + File.separatorChar + "views" + File.separatorChar + "layouts"
-      def gspFile = new File(pathToLayoutsDir + File.separatorChar + myTemplate.name + ".gsp");
-      if (gspFile.exists() && !overwrite) {
-        return true;
+
       }
       else {
-        //generate the gsp file and then try again..
-        println "trying to generate gsp file for $myTemplate.name"
-        if (templateService.generateGspFromTemplateHtml(myTemplate, gspFile))
-        {
-          return true;
-        }
-
+        templateInstance.errors.rejectValue("zip","Could not unzip file to temp directory ")
+        render(view: "create", model: [templateInstance: templateInstance])
       }
     }
-    return false;
 
+    else {
+      render(view: "create", model: [templateInstance: templateInstance])
+    }
   }
 
-  def retreiveZipAndDeflateToTemplateDir(Template myTemplate) {
+  def show = {
+    def templateInstance = Template.get(params.id)
+    if (!templateInstance) {
+      flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
+      redirect(action: "list")
+    }
+    else {
 
+      [templateInstance: templateInstance]
+    }
+  }
 
-    if (myTemplate) {
-      File tempFile = File.createTempFile(myTemplate.name,"");
-      tempFile.setBytes(myTemplate.getZip());
-      AntBuilder ant = new AntBuilder();
-      String pathToAppWebAppDir = applicationContext.getResourceByPath("/").getFile().getAbsolutePath();
-      String pathToTemplateDir = pathToAppWebAppDir +File.separatorChar+"artisteertemplates"+File.separatorChar
+  
+
+  def delete = {
+    def templateInstance = Template.get(params.id)
+    if (templateInstance) {
       try {
-        def myDir = new File(pathToTemplateDir);
-        if(!myDir.exists()) {
-          myDir.mkdirs();
-        }
-        println "tempfile is $tempFile and size is " +tempFile.size();
-        ant.unzip(src: tempFile, dest: pathToTemplateDir)
-      } catch (Throwable t) {
-        println t.toString();
+        templateInstance.delete(flush: true)
+        flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
+        redirect(action: "list")
       }
-
-
-    } else {
-      println "couldnt find template with name $name"
+      catch (org.springframework.dao.DataIntegrityViolationException e) {
+        flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
+        redirect(action: "show", id: params.id)
+      }
+    }
+    else {
+      flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
+      redirect(action: "list")
     }
   }
-    def private boolean deflateZipFromTemplate(Template myTemplate, boolean overwrite) {
-    
-    if (myTemplate) {
-      String pathToAppWebAppDir = applicationContext.getResourceByPath("/").getFile().getAbsolutePath();
-      String pathToTemplateDir = pathToAppWebAppDir + File.separatorChar+ "artisteertemplates" + File.separatorChar+ myTemplate.name + "/"
-      def pageFile = new File(pathToTemplateDir + File.separatorChar+ "page.html");
-      if (pageFile.exists() &&!overwrite) {
-        return true
-      } else {
-        //unzip it and check again..
-        retreiveZipAndDeflateToTemplateDir(myTemplate);
-        if (pageFile.exists()) {
-          return true
-        }
-      }
-
-
-    }
-
-    //if we reach this state we havent found anything..
-    return false;
-
-  }
-
-
-    static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
-
-    def index = {
-        redirect(action: "list", params: params)
-    }
-
-    def list = {
-        params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        [templateInstanceList: Template.list(params), templateInstanceTotal: Template.count()]
-    }
-
-    def create = {
-        def templateInstance = new Template()
-        templateInstance.properties = params
-        return [templateInstance: templateInstance]
-    }
-
-    def save = {
-        def templateInstance = new Template(params)
-        def MultipartFile f = request.getFile('zip');
-        println "filename is " + f.getOriginalFilename()
-        templateInstance.name = f.getOriginalFilename().replaceAll(".zip","");
-
-        if (templateInstance.save(flush: true) && deflateZipFromTemplate(templateInstance,true) && generateGspForTemplate(templateInstance,true)) {
-            flash.message = "${message(code: 'default.created.message', args: [message(code: 'template.label', default: 'Template'), templateInstance.id])}"
-
-
-            redirect(action: "show", id: templateInstance.id)
-        }
-        else {
-            render(view: "create", model: [templateInstance: templateInstance])
-        }
-    }
-
-    def show = {
-        def templateInstance = Template.get(params.id)
-        if (!templateInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
-            redirect(action: "list")
-        }
-        else {
-          
-            [templateInstance: templateInstance]
-        }
-    }
-
-    def edit = {
-        def templateInstance = Template.get(params.id)
-        if (!templateInstance) {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
-            redirect(action: "list")
-        }
-        else {
-            return [templateInstance: templateInstance]
-        }
-    }
-
-    def update = {
-        def templateInstance = Template.get(params.id)
-        if (templateInstance) {
-            if (params.version) {
-                def version = params.version.toLong()
-                if (templateInstance.version > version) {
-                    
-                    templateInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'template.label', default: 'Template')] as Object[], "Another user has updated this Template while you were editing")
-                    render(view: "edit", model: [templateInstance: templateInstance])
-                    return
-                }
-            }
-            templateInstance.properties = params
-            if (!templateInstance.hasErrors() && templateInstance.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'template.label', default: 'Template'), templateInstance.id])}"
-                redirect(action: "show", id: templateInstance.id)
-            }
-            else {
-                render(view: "edit", model: [templateInstance: templateInstance])
-            }
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
-            redirect(action: "list")
-        }
-    }
-
-    def delete = {
-        def templateInstance = Template.get(params.id)
-        if (templateInstance) {
-            try {
-                templateInstance.delete(flush: true)
-                flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
-                redirect(action: "list")
-            }
-            catch (org.springframework.dao.DataIntegrityViolationException e) {
-                flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
-                redirect(action: "show", id: params.id)
-            }
-        }
-        else {
-            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
-            redirect(action: "list")
-        }
-    }
 }
