@@ -26,6 +26,7 @@ target('default': "This will create a gps template based on an exported html sty
 
   def templateService = clazzTi.newInstance()
 
+  templateService?.afterPropertiesSet();
 
   List inArgs = argsMap?.params
 

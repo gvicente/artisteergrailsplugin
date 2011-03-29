@@ -4,7 +4,7 @@ import se.webinventions.plugins.artisteer.TemplateService
 
 class ArtisteerpluginGrailsPlugin {
   // the plugin version
-  def version = "0.1"
+  def version = "0.2"
   // the version or versions of Grails the plugin is designed for
   def grailsVersion = "1.3.4 > *"
   // the other plugins this plugin depends on
@@ -19,10 +19,13 @@ class ArtisteerpluginGrailsPlugin {
   def authorEmail = "contact@webinventions.se"
   def title = "Artisteer plugin"
   def description = '''\\
-Plugin that provides a simple controller for uploading artisteer zip file templates to grails. The plugin automatically
+Plugin that provides a simple script for unpacking artisteer zip file templates to grails. The plugin automatically
 unzips the template, creates a corresponding gsp layout file which links to an unpacked version of the artisteer template.
-The gsp contains links to other layouts that the user can customize (footer, title, menurendering).
- Footer and title etc is best to take from eg. the database, but I left it up to the user to configure that.
+The gsp contains applyLayout links to other layouts that the user can customize which includes footer, title, and menurendering.
+Examples of tags that can be used can be found under each corresponding layout file.
+The plugin also provides a controller which makes it possible to upload templates on the fly with a controller.
+The plugin is however at this stage only meant to work offline to import templates from artisteer. It works with artisteer 2.5,
+and haven't been tried with artisteer 3.0. Please find the sources on github: https://github.com/webinventions/artisteergrailsplugin
 '''
 
 

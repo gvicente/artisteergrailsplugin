@@ -28,7 +28,13 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
 
   void afterPropertiesSet() throws java.lang.Exception {
 
-    this.serverUrl = grailsApplication?.config?.grails?.serverURL
+
+    if(!grailsApplication) {
+      grailsApplication = ApplicationHolder.getApplication()
+    }
+
+
+      this.serverUrl = grailsApplication?.config?.grails?.serverURL
 
   }
 
