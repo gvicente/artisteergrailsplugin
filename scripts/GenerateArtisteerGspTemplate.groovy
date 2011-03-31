@@ -20,8 +20,8 @@ target('default': "This will create a gps template based on an exported html sty
 
 
 
-  def clazzTi = classLoader.loadClass('se.webinventions.plugins.artisteer.TemplateService')
-  def clazzT = classLoader.loadClass('se.webinventions.plugins.artisteer.Template')
+  Class clazzTi = classLoader.loadClass('se.webinventions.plugins.artisteer.TemplateService')
+  Class clazzT = classLoader.loadClass('se.webinventions.plugins.artisteer.Template')
 
 
   def templateService = clazzTi.newInstance()
@@ -45,7 +45,12 @@ target('default': "This will create a gps template based on an exported html sty
 
   def templateName = filename.substring(0,filename.indexOf(".zip"))
 
- def  templateInstance = clazzT.newInstance(name:templateName,id:0, zip:zipFile.getBytes());
+
+
+ def  templateInstance = clazzT.newInstance(name:templateName, zip:zipFile.getBytes());
+
+
+
   def webAppdir = "$settngs.baseDir"+File.separator+"web-app"+File.separator
 
   if (templateService.deflateZipFromTemplate(templateInstance, true,webAppdir)) {

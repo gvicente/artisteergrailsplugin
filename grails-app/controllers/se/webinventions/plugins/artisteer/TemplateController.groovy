@@ -8,6 +8,7 @@ import org.cyberneko.html.parsers.SAXParser
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import se.webinventions.plugins.artisteer.TemplateService
+import org.codehaus.groovy.grails.commons.GrailsDomainClass
 
 class TemplateController implements ApplicationContextAware, InitializingBean {
   ApplicationContext applicationContext
@@ -15,11 +16,28 @@ class TemplateController implements ApplicationContextAware, InitializingBean {
 
   def templateService;
   def grailsApplication;
+  def templateDomainClass
+  def config
+
   
   Boolean warDeployed = false;
 
   void afterPropertiesSet() throws java.lang.Exception {
+
+    if(!grailsApplication) {
+      grailsApplication = applicationContext.getBean("grailsApplication")
+    }
+
+    config = grailsApplication.config
+
     this.warDeployed = grailsApplication.isWarDeployed()
+
+
+
+    def templateClassName = config?.grails?.artisteer.templateClassName ?: "se.webinventions.plugins.artisteer.Template"
+     templateDomainClass = grailsApplication.getClassForName(templateClassName)
+
+
 
   }
 
@@ -32,17 +50,17 @@ class TemplateController implements ApplicationContextAware, InitializingBean {
 
   def list = {
     params.max = Math.min(params.max ? params.int('max') : 10, 100)
-    [templateInstanceList: Template.list(params), templateInstanceTotal: Template.count()]
+    [templateInstanceList: templateDomainClass.list(params), templateInstanceTotal: templateDomainClass.count()]
   }
 
   def create = {
-    def templateInstance = new Template()
+    def templateInstance =  templateDomainClass.newInstance()
     templateInstance.properties = params
     return [templateInstance: templateInstance]
   }
 
   def save = {
-    def templateInstance = new Template(params)
+    def templateInstance =  templateDomainClass.newInstance(params)
     def MultipartFile f = request.getFile('zip');
 
     println "filename is " + f.getOriginalFilename()
@@ -75,7 +93,7 @@ class TemplateController implements ApplicationContextAware, InitializingBean {
   }
 
   def show = {
-    def templateInstance = Template.get(params.id)
+    def templateInstance = templateDomainClass.get(params.id)
     if (!templateInstance) {
       flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'template.label', default: 'Template'), params.id])}"
       redirect(action: "list")
@@ -89,7 +107,7 @@ class TemplateController implements ApplicationContextAware, InitializingBean {
   
 
   def delete = {
-    def templateInstance = Template.get(params.id)
+    def templateInstance = templateDomainClass.get(params.id)
     if (templateInstance) {
       try {
         templateInstance.delete(flush: true)

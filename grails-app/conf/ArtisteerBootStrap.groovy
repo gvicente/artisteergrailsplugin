@@ -1,4 +1,3 @@
-import se.webinventions.plugins.artisteer.Template
 import se.webinventions.plugins.artisteer.TemplateService
 import grails.util.GrailsUtil
 

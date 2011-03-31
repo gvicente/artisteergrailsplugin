@@ -10,8 +10,8 @@ import grails.util.GrailsUtil
 import org.codehaus.groovy.grails.commons.spring.GrailsRuntimeConfigurator
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.beans.factory.InitializingBean
-import se.webinventions.plugins.artisteer.Template;
 import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.GrailsDomainClass
 
 class TemplateService implements ApplicationContextAware, InitializingBean {
   ApplicationContext applicationContext = (ApplicationContext) ApplicationHolder.getApplication().getMainContext();
@@ -23,6 +23,10 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
   Logger log = Logger.getLogger(getClass())
 
   def grailsApplication;
+  def templateDomainClass
+  def config
+
+
 
   static transactional = false
 
@@ -33,18 +37,24 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
       grailsApplication = ApplicationHolder.getApplication()
     }
 
+    config = grailsApplication.config
+
+    def templateClassName = config?.grails?.artisteer.templateClassName ?: "se.webinventions.plugins.artisteer.Template"
+        templateDomainClass = grailsApplication.getClassForName(templateClassName)
+
+
 
       this.serverUrl = grailsApplication?.config?.grails?.serverURL
 
   }
 
 
-  def public boolean generateGspForTemplate(Template myTemplate, overwrite) {
+  def public boolean generateGspForTemplate(Object myTemplate, overwrite) {
     String pathToAppWebAppDir = applicationContext.getResourceByPath("/").getFile().getAbsolutePath()
     return generateGspForTemplate(myTemplate,overwrite,pathToAppWebAppDir)
   }
 
-  def public boolean generateGspForTemplate(Template myTemplate, overwrite, pathToAppWebAppDir) {
+  def public boolean generateGspForTemplate(Object myTemplate, overwrite, pathToAppWebAppDir) {
 
     if (myTemplate) {
 
@@ -54,14 +64,20 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
       String pathToRootAppDir = pathToAppWebAppDir + File.separatorChar + ".." + File.separatorChar;
 
       String pathToLayoutsDir = pathToRootAppDir + File.separatorChar + "grails-app" + File.separatorChar + "views" + File.separatorChar + "layouts"
-      def gspFile = new File(pathToLayoutsDir + File.separatorChar + myTemplate.name + "-" + myTemplate.id + ".gsp");
+      def tpid = '';
+      if(myTemplate?.id) {
+        tpid= "-" + myTemplate?.id
+      }
+
+
+      def gspFile = new File(pathToLayoutsDir + File.separatorChar + myTemplate.name + tpid + ".gsp");
       if (gspFile.exists() && !overwrite) {
         return true;
       }
       else {
         //generate the gsp file and then try again..
         if(log) {
-          log?.info("trying to generate gsp file for $myTemplate.name version $myTemplate.id for file: "+gspFile);
+          log?.info("trying to generate gsp file for $myTemplate.name version $myTemplate?.id for file: "+gspFile);
         }
 
         if (generateGspFromTemplateHtml(myTemplate, gspFile,pathToAppWebAppDir)) {
@@ -74,11 +90,17 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
 
   }
 
-  def retreiveZipAndDeflateToTemplateDir(Template myTemplate, String pathToAppWebAppDir) {
+  def retreiveZipAndDeflateToTemplateDir(Object myTemplate, String pathToAppWebAppDir) {
 
 
     if (myTemplate) {
-      File tempFile = File.createTempFile((myTemplate.name + myTemplate.id), "");
+
+      def tpid = '';
+      if(myTemplate?.id) {
+        tpid= "-" + myTemplate?.id
+      }
+
+      File tempFile = File.createTempFile((myTemplate.name + tpid), "");
       tempFile.setBytes(myTemplate.getZip());
       AntBuilder ant = new AntBuilder();
 
@@ -89,7 +111,7 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
           myDir.mkdirs();
         }
         println "tempfile is $tempFile and size is " + tempFile.size();
-        ant.unzip(src: tempFile, dest: pathToTemplateDir + myTemplate.name + '-' + myTemplate.id + File.separatorChar)
+        ant.unzip(src: tempFile, dest: pathToTemplateDir + myTemplate.name + tpid + File.separatorChar)
       } catch (Throwable t) {
         println t.toString();
       }
@@ -100,17 +122,21 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
     }
   }
 
-  def public boolean deflateZipFromTemplate(Template myTemplate,boolean overwrite) {
+  def public boolean deflateZipFromTemplate(Object myTemplate,boolean overwrite) {
     String pathToAppWebAppDir = applicationContext?.getResourceByPath("/").getFile().getAbsolutePath();
 
     return deflateZipFromTemplate(myTemplate,overwrite, pathToAppWebAppDir)
   }
 
-  def public boolean deflateZipFromTemplate(Template myTemplate, boolean overwrite, String pathToAppWebAppDir) {
+  def public boolean deflateZipFromTemplate(Object myTemplate, boolean overwrite, String pathToAppWebAppDir) {
 
     if (myTemplate) {
 
-      String pathToTemplateDir = pathToAppWebAppDir + File.separatorChar + "artisteertemplates" + File.separatorChar + myTemplate.name + "-" + myTemplate.id + "/" + myTemplate.name + "/"
+      def tpid = '';
+      if(myTemplate?.id) {
+        tpid= "-" + myTemplate?.id
+      }
+      String pathToTemplateDir = pathToAppWebAppDir + File.separatorChar + "artisteertemplates" + File.separatorChar + myTemplate.name +tpid + "/" + myTemplate.name + "/"
       def pageFile = new File(pathToTemplateDir + File.separatorChar + "page.html");
       if (pageFile.exists() && !overwrite) {
         return true
@@ -132,11 +158,15 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
 
 
 
-  def public boolean generateGspFromTemplateHtml(Template myTemplate, File gspFileOut, String pathToWebAppDir) {
+  def public boolean generateGspFromTemplateHtml(Object myTemplate, File gspFileOut, String pathToWebAppDir) {
 
 
-    String pathToTemplateDir = pathToWebAppDir + "/artisteertemplates/" + myTemplate.name + "-" + myTemplate.id + "/" + myTemplate.name + "/"
-    String pathToCssFromTemplates = "../../../web-app/artisteertemplates" + File.separatorChar + myTemplate.name + "-" + myTemplate.id + "/" + myTemplate.name + "/"
+    def tpid = '';
+      if(myTemplate?.id) {
+        tpid= "-" + myTemplate?.id
+      }
+    String pathToTemplateDir = pathToWebAppDir + "/artisteertemplates/" + myTemplate.name +tpid+ "/" + myTemplate.name + "/"
+    String pathToCssFromTemplates = "../../../web-app/artisteertemplates" + File.separatorChar + myTemplate.name + tpid+ "/" + myTemplate.name + "/"
     def pageFile = new File(pathToTemplateDir + "/page.html");
     if (pageFile.exists()) {
 
@@ -156,14 +186,14 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
 
           link(rel: "stylesheet", href: "${serverUrl}/css/main.css")
 
-          link(rel: "stylesheet", href: "${serverUrl}/artisteertemplates/${myTemplate.name + '-' + myTemplate.id + '/' + myTemplate.name}/style.css", type: "text/css");
+          link(rel: "stylesheet", href: "${serverUrl}/artisteertemplates/${myTemplate.name + tpid + '/' + myTemplate.name}/style.css", type: "text/css");
           mkp.yieldUnescaped("<!--[if IE 6]>")
 
-          link(rel: "stylesheet", href: "${serverUrl}/artisteertemplates/${myTemplate.name + '-' + myTemplate.id + '/' + myTemplate.name}/style.ie6.css", type: "text/css");
+          link(rel: "stylesheet", href: "${serverUrl}/artisteertemplates/${myTemplate.name + tpid + '/' + myTemplate.name}/style.ie6.css", type: "text/css");
           mkp.yieldUnescaped("<![endif]-->")
 
           mkp.yieldUnescaped("<!--[if IE 7]>")
-          link(rel: "stylesheet", href: "${serverUrl}/artisteertemplates/${myTemplate.name + '-' + myTemplate.id + '/' + myTemplate.name}/style.ie7.css", type: "text/css");
+          link(rel: "stylesheet", href: "${serverUrl}/artisteertemplates/${myTemplate.name + tpid + '/' + myTemplate.name}/style.ie7.css", type: "text/css");
           mkp.yieldUnescaped("<![endif]-->")
 
 
@@ -175,7 +205,7 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
 
 
           meta("http-equiv": "Content-Type", content: "text/html; charset=UTF-8")
-          script(type: "text/javascript", src: "${serverUrl}/artisteertemplates/${myTemplate.name + '-' + myTemplate.id + '/' + myTemplate.name}/script.js")
+          script(type: "text/javascript", src: "${serverUrl}/artisteertemplates/${myTemplate.name + tpid + '/' + myTemplate.name}/script.js")
           g.layoutHead()
           g.applyLayout(name: "artisteerheaderadditions")
 
@@ -319,7 +349,7 @@ class TemplateService implements ApplicationContextAware, InitializingBean {
 
       }
 
-      replacement = replacement.replaceAll("<BODY>", "<body>").replaceAll("</BODY>", "</body>").replaceAll("<HTML>", "<html>").replaceAll("</HTML>", "</html>").replaceAll("<A", "<a").replaceAll("</A>", "</a>").replaceAll("<DIV", "<div").replaceAll("</DIV>", "</div>").replaceAll('src="images/', 'src="' + serverUrl + '/artisteertemplates/' + myTemplate.name + '-' + myTemplate.id + '/' + myTemplate.name + '/images/')
+      replacement = replacement.replaceAll("<BODY>", "<body>").replaceAll("</BODY>", "</body>").replaceAll("<HTML>", "<html>").replaceAll("</HTML>", "</html>").replaceAll("<A", "<a").replaceAll("</A>", "</a>").replaceAll("<DIV", "<div").replaceAll("</DIV>", "</div>").replaceAll('src="images/', 'src="' + serverUrl + '/artisteertemplates/' + myTemplate.name +tpid + '/' + myTemplate.name + '/images/')
 
 
 
