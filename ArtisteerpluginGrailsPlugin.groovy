@@ -3,14 +3,18 @@ import se.webinventions.plugins.artisteer.TemplateService
 
 class ArtisteerpluginGrailsPlugin {
   // the plugin version
-  def version = "0.3.1"
+  def version = "0.4"
   // the version or versions of Grails the plugin is designed for
   def grailsVersion = "1.3.4 > *"
   // the other plugins this plugin depends on
-  def dependsOn = [:];
+  def dependsOn = ["fckeditor":"*>0.9"];
   // resources that are excluded from plugin packaging
   def pluginExcludes = [
-          "grails-app/views/error.gsp"
+          "grails-app/views/error.gsp",
+          "grails-app/domain/Page.groovy",
+          "grails-app/domain/Article.groovy",
+          "grails-app/domain/Template.groovy",
+          "grails-app/domain/VerticalBlock.groovy"
   ]
 
   // TODO Fill in these fields
