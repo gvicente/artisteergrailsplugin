@@ -212,6 +212,7 @@ class TemplateService implements ApplicationContextAware, InitializingBean, Bean
         File logoFile = new File(new SafePathAppender(layoutDir).append("logo.gsp"))
         File navigationMenuFile = new File(new SafePathAppender(layoutDir).append("navigationMenu.gsp"))
         File footerFile = new File(new SafePathAppender(layoutDir).append("footer.gsp"))
+        File mainFile = new File(new SafePathAppender(layoutDir).append("main.gsp"))
         if (!logoFile.exists()) {
             logoFile.createNewFile()
             logoFile.setText(logoContent)
@@ -223,6 +224,14 @@ class TemplateService implements ApplicationContextAware, InitializingBean, Bean
         if (!footerFile.exists()) {
             footerFile.createNewFile()
             footerFile.setText(footerContent)
+        }
+        if (!mainFile.exists()) {
+            mainFile.createNewFile()
+            mainFile.setText(Default.defaultMainLayout)
+        }else{
+            if(!mainFile.getText().contains("applyArtisteerLayout")){
+               mainFile.setText(Default.defaultMainLayout)
+            }
         }
     }
 

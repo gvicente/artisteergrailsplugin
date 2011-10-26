@@ -88,4 +88,17 @@ class Default {
     </div>
     """
 
+    public static final String defaultMainLayout = """
+<artisteer:applyArtisteerLayout>
+    <html>
+    <head>
+        <g:layoutHead/>
+    </head>
+
+    <body>
+        <g:layoutBody/>
+    </body>
+    </html>
+</artisteer:applyArtisteerLayout>
+"""
 }
