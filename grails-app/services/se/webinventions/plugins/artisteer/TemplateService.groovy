@@ -18,8 +18,8 @@ class TemplateService implements ApplicationContextAware, InitializingBean, Bean
 
     def applicationContext
 
-    private File zipDir = new File(readFromBeanBag("zipDir").toString())
-    private File targetDir = new File(readFromBeanBag("targetDir").toString())
+    private File zipDir
+    private File targetDir
 
     public static def handlerBean
 
@@ -205,7 +205,8 @@ class TemplateService implements ApplicationContextAware, InitializingBean, Bean
     }
 
     void afterPropertiesSet() {
-        //Runs after all properties are set
+        zipDir = new File(readFromBeanBag("zipDir").toString())
+        targetDir = new File(readFromBeanBag("targetDir").toString())
     }
 
     private void generateSupportingLayouts(String layoutDir, String logoContent, String navMenuContent, String footerContent) {
@@ -228,9 +229,9 @@ class TemplateService implements ApplicationContextAware, InitializingBean, Bean
         if (!mainFile.exists()) {
             mainFile.createNewFile()
             mainFile.setText(Default.defaultMainLayout)
-        }else{
-            if(!mainFile.getText().contains("applyArtisteerLayout")){
-               mainFile.setText(Default.defaultMainLayout)
+        } else {
+            if (!mainFile.getText().contains("applyArtisteerLayout")) {
+                mainFile.setText(Default.defaultMainLayout)
             }
         }
     }

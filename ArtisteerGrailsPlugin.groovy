@@ -62,6 +62,7 @@ and haven't been tried with artisteer 3.0. Please find the sources on github: ht
         storeInBeanBag "webAppDir", applicationContext.getResourceByPath("/").getFile().getAbsolutePath()
         storeInBeanBag "rootAppDir", new SafePathAppender(applicationContext.getResourceByPath("/").getFile().getAbsolutePath()).append("../")
 
+        templateService.afterPropertiesSet()
         templateService.unzipAllTemplatesInZipDir()
 
     }
