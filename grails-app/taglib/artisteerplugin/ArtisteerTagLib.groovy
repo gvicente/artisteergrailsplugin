@@ -1,16 +1,31 @@
 package artisteerplugin
 
+import se.webinventions.plugins.artisteer.Template
+
 class ArtisteerTagLib {
 
-  static namespace = "artisteer"
+    static namespace = "artisteer"
 
+    def templateService
 
+    def applyArtisteerLayout = { attrs, body ->
+        Template template = templateService.getToBeAppliedTemplate()
+        if (template) {
+            attrs.name = "$template.name"
+            out << g.applyLayout(attrs, body)
+        } else {
+            out << body
+        }
+    }
 
+/*
 
-  /**
-  *
-   * BEGIN NAVIGATION TAGS..
-   */
+*/
+/**
+ *
+ * BEGIN NAVIGATION TAGS..
+ *//*
+
   def renderTopMenu = {attrs, body ->
 
     out <<   """ <ul class="art-menu">
@@ -121,6 +136,7 @@ class ArtisteerTagLib {
 
 
   }
+*/
 
 }
 
