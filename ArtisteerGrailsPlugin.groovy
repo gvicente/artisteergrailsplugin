@@ -5,7 +5,7 @@ import se.webinventions.plugins.artisteer.TemplateService
 
 class ArtisteerGrailsPlugin implements BeanBagUser {
 
-    def version = "1.2.6"
+    def version = "1.3.6"
     def grailsVersion = "1.3.4 > *"
     def dependsOn = [:]
     def pluginExcludes = [
