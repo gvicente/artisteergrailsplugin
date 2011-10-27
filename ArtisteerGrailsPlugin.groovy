@@ -5,7 +5,7 @@ import se.webinventions.plugins.artisteer.TemplateService
 
 class ArtisteerGrailsPlugin implements BeanBagUser {
 
-    def version = "1.1.0"
+    def version = "1.2.6"
     def grailsVersion = "1.3.4 > *"
     def dependsOn = [:]
     def pluginExcludes = [
@@ -62,8 +62,10 @@ and haven't been tried with artisteer 3.0. Please find the sources on github: ht
         storeInBeanBag "webAppDir", applicationContext.getResourceByPath("/").getFile().getAbsolutePath()
         storeInBeanBag "rootAppDir", new SafePathAppender(applicationContext.getResourceByPath("/").getFile().getAbsolutePath()).append("../")
 
+        println "[ARTISTEER PLUGIN] - Preparing Templates..."
         templateService.afterPropertiesSet()
         templateService.unzipAllTemplatesInZipDir()
+        println "[ARTISTEER PLUGIN] - Templates Processing Compete"
 
     }
 
@@ -78,3 +80,11 @@ and haven't been tried with artisteer 3.0. Please find the sources on github: ht
         // The event is the same as for 'onChange'.
     }
 }
+
+
+//Bugs
+/*
+* 1) resource path --done
+* 2) no gsp there :(
+*
+*/
