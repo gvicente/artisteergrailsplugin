@@ -10,4 +10,12 @@ eventCreateWarStart = {name, stagingDir ->
     }
 
     println "[ARTISTEER PLUGIN] Copied Files To: ${to}"
+
+    println "[ARTISTEER PLUGIN] Deleting template files from web app."
+
+    ant.delete(dir: "${stagingDir}/WEB-INF/web-app/css/templates")
+    ant.delete(dir: "${stagingDir}/WEB-INF/web-app/js/templates")
+
+    println "[ARTISTEER PLUGIN] Deleted Files."
+
 }

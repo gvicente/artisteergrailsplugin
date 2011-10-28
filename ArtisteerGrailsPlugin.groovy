@@ -5,7 +5,7 @@ import se.webinventions.plugins.artisteer.TemplateService
 
 class ArtisteerGrailsPlugin implements BeanBagUser {
 
-    def version = "1.3.6"
+    def version = "1.3.9"
     def grailsVersion = "1.3.4 > *"
     def dependsOn = [:]
     def pluginExcludes = [
@@ -80,11 +80,3 @@ and haven't been tried with artisteer 3.0. Please find the sources on github: ht
         // The event is the same as for 'onChange'.
     }
 }
-
-
-//Bugs
-/*
-* 1) resource path --done
-* 2) no gsp there :(
-*
-*/

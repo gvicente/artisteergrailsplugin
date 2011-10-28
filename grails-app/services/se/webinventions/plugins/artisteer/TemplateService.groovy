@@ -38,7 +38,19 @@ class TemplateService implements ApplicationContextAware, InitializingBean, Bean
     }
 
     private void syncDatabaseToZipDir() {
-
+        List<String> fileNames = []
+        zipDir.eachFileRecurse {file ->
+            fileNames.add(file.getName() - ".zip")
+        }
+        Template.list().each {template ->
+            if (!fileNames.find {it == template.name}) {
+                File target = new File(new SafePathAppender(zipDir.getCanonicalPath()).append(template.category))
+                target.mkdirs()
+                target = new File(new SafePathAppender(zipDir.getCanonicalPath()).append("${template.category}/${template.name}.zip"))
+                target.createNewFile()
+                target.setBytes(template.zip)
+            }
+        }
     }
 
     public void initializeTemplate(Template template) {
@@ -137,7 +149,7 @@ class TemplateService implements ApplicationContextAware, InitializingBean, Bean
             String file = fileObject.text
             String head = file.find(/<[hH][eE][aA][dD]>[.\w\s<>!-:"';={}\|\[\]\d\s\D\S]*<\/[hH][eE][aA][dD]>/)
             head = head.replaceAll(/<[hH][eE][aA][dD]>/, "").replaceAll(/<\/[hH][eE][aA][dD]>/, "")
-            head = head.replaceAll(/<[tT][iI][tT][lL][eE]>.*<\/[tT][iI][tT][lL][eE]>/, "")
+            head = head.replaceAll(/<[tT][iI][tT][lL][eE]>.*<\/[tT][iI][tT][lL][eE]>/, "<title><g:layoutTitle default=\"Grails\"/></title>")
             head = head + "\n" + "<g:layoutHead/>"
 
             String path = "templates/${template.name}"

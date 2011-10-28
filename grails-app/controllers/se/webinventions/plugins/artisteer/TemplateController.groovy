@@ -62,7 +62,6 @@ class TemplateController {
             if (params.version) {
                 def version = params.version.toLong()
                 if (templateInstance.version > version) {
-
                     templateInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'template.label', default: 'Template')] as Object[], "Another user has updated this Template while you were editing")
                     render(view: "edit", model: [templateInstance: templateInstance])
                     return
@@ -70,6 +69,7 @@ class TemplateController {
             }
             templateInstance.properties = params
             if (!templateInstance.hasErrors() && templateInstance.save(flush: true)) {
+                templateService.initializeTemplate(templateInstance)
                 flash.message = "${message(code: 'default.updated.message', args: [message(code: 'template.label', default: 'Template'), templateInstance.id])}"
                 redirect(action: "show", id: templateInstance.id)
             }
