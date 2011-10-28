@@ -101,4 +101,10 @@ class TemplateController {
             redirect(action: "list")
         }
     }
+
+    def preview = {
+        def templateInstance = Template.get(params.id)
+        response.setContentType(templateInstance?.getPreviewImage()?.type)
+        response.outputStream << templateInstance?.getPreviewImage()?.image
+    }
 }

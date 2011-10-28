@@ -3,6 +3,7 @@ package se.webinventions.plugins.artisteer
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import se.webinventions.util.SafePathAppender
 import se.webinventions.util.BeanBag
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
 class Template {
 
@@ -12,6 +13,8 @@ class Template {
     byte[] zip
 
     static transients = ['previewImage', 'previewUrl']
+
+    static transient ApplicationTagLib applicationTagLib = new ApplicationTagLib()
 
     static constraints = {
         name(nullable: false, blank: false, editable: false, unique: true)
@@ -23,7 +26,7 @@ class Template {
     }
 
     public String getPreviewUrl() {
-        return (ConfigurationHolder.config.grails.serverURL + "/template/preview/" + this.id)
+        applicationTagLib.createLink(controller: 'template', action: 'preview', id: this.id)
     }
 
     public Expando getPreviewImage() {
