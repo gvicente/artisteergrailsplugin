@@ -42,7 +42,7 @@
 
             <tr class="prop">
                 <td valign="top" class="name"><g:message code="template.zip.label" default="Zip"/></td>
-
+                <td></td>
             </tr>
 
             <tr class="prop">

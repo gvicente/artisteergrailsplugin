@@ -25,7 +25,8 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-        compile 'org.apache.ant:ant:1.7.1'
-        compile 'org.apache.ant:ant-launcher:1.7.1'
+        ['ant', 'ant-launcher', 'ant-nodeps', 'ant-trax', 'ant-junit'].each {
+            runtime("org.apache.ant:${it}:1.7.1")
+        }
     }
 }

@@ -29,8 +29,6 @@
 
                 <g:sortableColumn property="name" title="${message(code: 'template.name.label', default: 'Name')}"/>
 
-                <g:sortableColumn property="zip" title="${message(code: 'template.zip.label', default: 'Zip')}"/>
-
                 <g:sortableColumn property="category"
                                   title="${message(code: 'template.category.label', default: 'Category')}"/>
 
@@ -44,8 +42,6 @@
                                 id="${templateInstance.id}">${fieldValue(bean: templateInstance, field: "id")}</g:link></td>
 
                     <td>${fieldValue(bean: templateInstance, field: "name")}</td>
-
-                    <td>${fieldValue(bean: templateInstance, field: "zip")}</td>
 
                     <td>${fieldValue(bean: templateInstance, field: "category")}</td>
 
