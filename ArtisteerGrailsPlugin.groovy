@@ -5,7 +5,7 @@ import se.webinventions.plugins.artisteer.TemplateService
 
 class ArtisteerGrailsPlugin implements BeanBagUser {
 
-    def version = "1.4.2"
+    def version = "1.4.3"
     def grailsVersion = "1.3.4 > *"
     def dependsOn = [:]
     def pluginExcludes = [
@@ -49,10 +49,13 @@ and haven't been tried with artisteer 3.0. Please find the sources on github: ht
         TemplateService templateService = applicationContext.getBean("templateService")
         boolean warDeployed = grailsApplication.isWarDeployed()
         String basePath
+        String rootAppDir
         if (warDeployed) {
             basePath = ApplicationHolder.application.parentContext.servletContext.getRealPath('WEB-INF/grails-app/artisteer/')
+            rootAppDir = ApplicationHolder.application.parentContext.servletContext.getRealPath('WEB-INF/')
         } else {
             basePath = 'grails-app/artisteer/'
+            rootAppDir = "."
         }
         SafePathAppender safePathAppender = new SafePathAppender(basePath)
 
@@ -60,13 +63,12 @@ and haven't been tried with artisteer 3.0. Please find the sources on github: ht
         storeInBeanBag "zipDir", safePathAppender.append("zip/")
         storeInBeanBag "targetDir", safePathAppender.append(".target/")
         storeInBeanBag "webAppDir", applicationContext.getResourceByPath("/").getFile().getAbsolutePath()
-        storeInBeanBag "rootAppDir", new SafePathAppender(applicationContext.getResourceByPath("/").getFile().getAbsolutePath()).append("../")
+        storeInBeanBag "rootAppDir", rootAppDir
 
         println "[ARTISTEER PLUGIN] - Preparing Templates..."
         templateService.afterPropertiesSet()
         templateService.unzipAllTemplatesInZipDir()
         println "[ARTISTEER PLUGIN] - Templates Processing Compete"
-
     }
 
     def onChange = { event ->
